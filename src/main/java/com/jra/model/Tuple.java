@@ -72,4 +72,23 @@ public class Tuple {
     public String toString() {
         return values.toString();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Tuple other)) {
+            return false;
+        }
+
+        return schema.equals(other.schema)
+                && values.equals(other.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * schema.hashCode() + values.hashCode();
+    }
 }

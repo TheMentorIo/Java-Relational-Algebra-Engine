@@ -1,4 +1,4 @@
-package com.mio;
+package com.jra;
 
 public class Main {
     public static void main(String[] args) {
