@@ -3,6 +3,7 @@ package com.jra.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Tuple {
 
@@ -11,11 +12,15 @@ public class Tuple {
 
     public Tuple(Schema schema, List<Object> values) {
         if (schema == null) {
-            throw new IllegalArgumentException("Schema cannot be null");
+            throw new IllegalArgumentException(
+                    "Schema cannot be null"
+            );
         }
 
         if (values == null) {
-            throw new IllegalArgumentException("Values cannot be null");
+            throw new IllegalArgumentException(
+                    "Values cannot be null"
+            );
         }
 
         if (values.size() != schema.size()) {
@@ -30,8 +35,10 @@ public class Tuple {
 
             if (!attribute.isValidValue(value)) {
                 throw new IllegalArgumentException(
-                        "Invalid value for attribute '" + attribute.getName() +
-                        "': " + value
+                        "Invalid value for attribute '"
+                        + attribute.getName()
+                        + "': "
+                        + value
                 );
             }
         }
@@ -69,11 +76,6 @@ public class Tuple {
     }
 
     @Override
-    public String toString() {
-        return values.toString();
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -89,6 +91,11 @@ public class Tuple {
 
     @Override
     public int hashCode() {
-        return 31 * schema.hashCode() + values.hashCode();
+        return Objects.hash(schema, values);
+    }
+
+    @Override
+    public String toString() {
+        return values.toString();
     }
 }

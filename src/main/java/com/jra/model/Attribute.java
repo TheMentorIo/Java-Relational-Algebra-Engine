@@ -9,11 +9,15 @@ public class Attribute {
 
     public Attribute(String name, Class<?> type) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Attribute name cannot be null or blank");
+            throw new IllegalArgumentException(
+                    "Attribute name cannot be null or blank"
+            );
         }
 
         if (type == null) {
-            throw new IllegalArgumentException("Attribute type cannot be null");
+            throw new IllegalArgumentException(
+                    "Attribute type cannot be null"
+            );
         }
 
         this.name = name;
@@ -44,24 +48,31 @@ public class Attribute {
         if (type == int.class) {
             return Integer.class;
         }
+
         if (type == long.class) {
             return Long.class;
         }
+
         if (type == double.class) {
             return Double.class;
         }
+
         if (type == float.class) {
             return Float.class;
         }
+
         if (type == boolean.class) {
             return Boolean.class;
         }
+
         if (type == char.class) {
             return Character.class;
         }
+
         if (type == byte.class) {
             return Byte.class;
         }
+
         if (type == short.class) {
             return Short.class;
         }

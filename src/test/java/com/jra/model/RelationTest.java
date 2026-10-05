@@ -1,6 +1,6 @@
 package com.jra.model;
 
-import java.util.List;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,19 +12,30 @@ import org.junit.jupiter.api.Test;
 class RelationTest {
 
     private Schema createStudentSchema() {
-        Schema schema = new Schema();
+        return new Schema(
+                Arrays.asList(
+                        new Attribute("student_id", Integer.class),
+                        new Attribute("name", String.class),
+                        new Attribute("year", Integer.class)
+                )
+        );
+    }
 
-        schema.addAttribute(new Attribute("id", Integer.class));
-        schema.addAttribute(new Attribute("name", String.class));
-
-        return schema;
+    private Tuple createStudentTuple(Schema schema) {
+        return new Tuple(
+                schema,
+                Arrays.asList(1, "Ahmed", 4)
+        );
     }
 
     @Test
     void shouldCreateRelation() {
         Schema schema = createStudentSchema();
 
-        Relation relation = new Relation("Student", schema);
+        Relation relation = new Relation(
+                "Student",
+                schema
+        );
 
         assertEquals("Student", relation.getName());
         assertSame(schema, relation.getSchema());
@@ -32,15 +43,43 @@ class RelationTest {
     }
 
     @Test
+    void shouldRejectNullRelationName() {
+        Schema schema = createStudentSchema();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Relation(null, schema)
+        );
+    }
+
+    @Test
+    void shouldRejectBlankRelationName() {
+        Schema schema = createStudentSchema();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Relation("   ", schema)
+        );
+    }
+
+    @Test
+    void shouldRejectNullSchema() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new Relation("Student", null)
+        );
+    }
+
+    @Test
     void shouldAddTuple() {
         Schema schema = createStudentSchema();
 
-        Relation relation = new Relation("Student", schema);
-
-        Tuple tuple = new Tuple(
-                schema,
-                List.of(1, "Ahmed")
+        Relation relation = new Relation(
+                "Student",
+                schema
         );
+
+        Tuple tuple = createStudentTuple(schema);
 
         relation.addTuple(tuple);
 
@@ -49,28 +88,13 @@ class RelationTest {
     }
 
     @Test
-    void shouldRejectTupleWithDifferentSchema() {
-        Schema schema1 = createStudentSchema();
-        Schema schema2 = createStudentSchema();
-
-        Relation relation = new Relation("Student", schema1);
-
-        Tuple tuple = new Tuple(
-                schema2,
-                List.of(1, "Ahmed")
-        );
-
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> relation.addTuple(tuple)
-        );
-    }
-
-    @Test
     void shouldRejectNullTuple() {
         Schema schema = createStudentSchema();
 
-        Relation relation = new Relation("Student", schema);
+        Relation relation = new Relation(
+                "Student",
+                schema
+        );
 
         assertThrows(
                 IllegalArgumentException.class,
@@ -79,15 +103,33 @@ class RelationTest {
     }
 
     @Test
+    void shouldRejectTupleWithDifferentSchemaReference() {
+        Schema relationSchema = createStudentSchema();
+        Schema tupleSchema = createStudentSchema();
+
+        Relation relation = new Relation(
+                "Student",
+                relationSchema
+        );
+
+        Tuple tuple = createStudentTuple(tupleSchema);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> relation.addTuple(tuple)
+        );
+    }
+
+    @Test
     void shouldRemoveTuple() {
         Schema schema = createStudentSchema();
 
-        Relation relation = new Relation("Student", schema);
-
-        Tuple tuple = new Tuple(
-                schema,
-                List.of(1, "Ahmed")
+        Relation relation = new Relation(
+                "Student",
+                schema
         );
+
+        Tuple tuple = createStudentTuple(schema);
 
         relation.addTuple(tuple);
         relation.removeTuple(tuple);
@@ -97,15 +139,107 @@ class RelationTest {
     }
 
     @Test
-    void shouldKeepTupleSchemaIdenticalToRelationSchema() {
+    void shouldIgnoreDuplicateTuple() {
         Schema schema = createStudentSchema();
 
-        Relation relation = new Relation("Student", schema);
-
-        Tuple tuple = new Tuple(
-                schema,
-                List.of(1, "Ahmed")
+        Relation relation = new Relation(
+                "Student",
+                schema
         );
+
+        Tuple first = new Tuple(
+                schema,
+                Arrays.asList(1, "Ahmed", 4)
+        );
+
+        Tuple second = new Tuple(
+                schema,
+                Arrays.asList(1, "Ahmed", 4)
+        );
+
+        relation.addTuple(first);
+        relation.addTuple(second);
+
+        assertEquals(1, relation.size());
+    }
+
+    @Test
+    void shouldContainEqualTuple() {
+        Schema schema = createStudentSchema();
+
+        Relation relation = new Relation(
+                "Student",
+                schema
+        );
+
+        Tuple stored = new Tuple(
+                schema,
+                Arrays.asList(1, "Ahmed", 4)
+        );
+
+        Tuple equalTuple = new Tuple(
+                schema,
+                Arrays.asList(1, "Ahmed", 4)
+        );
+
+        relation.addTuple(stored);
+
+        assertTrue(relation.containsTuple(equalTuple));
+    }
+
+    @Test
+    void shouldRemoveEqualTuple() {
+        Schema schema = createStudentSchema();
+
+        Relation relation = new Relation(
+                "Student",
+                schema
+        );
+
+        Tuple stored = new Tuple(
+                schema,
+                Arrays.asList(1, "Ahmed", 4)
+        );
+
+        Tuple equalTuple = new Tuple(
+                schema,
+                Arrays.asList(1, "Ahmed", 4)
+        );
+
+        relation.addTuple(stored);
+        relation.removeTuple(equalTuple);
+
+        assertEquals(0, relation.size());
+    }
+
+    @Test
+    void shouldReturnUnmodifiableTuples() {
+        Schema schema = createStudentSchema();
+
+        Relation relation = new Relation(
+                "Student",
+                schema
+        );
+
+        Tuple tuple = createStudentTuple(schema);
+        relation.addTuple(tuple);
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> relation.getTuples().clear()
+        );
+    }
+
+    @Test
+    void tupleShouldReferenceRelationSchema() {
+        Schema schema = createStudentSchema();
+
+        Relation relation = new Relation(
+                "Student",
+                schema
+        );
+
+        Tuple tuple = createStudentTuple(schema);
 
         relation.addTuple(tuple);
 

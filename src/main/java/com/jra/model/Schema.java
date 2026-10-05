@@ -3,6 +3,7 @@ package com.jra.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Schema {
 
@@ -13,7 +14,13 @@ public class Schema {
     }
 
     public Schema(List<Attribute> attributes) {
-        this();
+        if (attributes == null) {
+            throw new IllegalArgumentException(
+                    "Attributes cannot be null"
+            );
+        }
+
+        this.attributes = new ArrayList<>();
 
         for (Attribute attribute : attributes) {
             addAttribute(attribute);
@@ -22,12 +29,15 @@ public class Schema {
 
     public void addAttribute(Attribute attribute) {
         if (attribute == null) {
-            throw new IllegalArgumentException("Attribute cannot be null");
+            throw new IllegalArgumentException(
+                    "Attribute cannot be null"
+            );
         }
 
         if (containsAttribute(attribute.getName())) {
             throw new IllegalArgumentException(
-                    "Duplicate attribute name: " + attribute.getName()
+                    "Duplicate attribute name: "
+                    + attribute.getName()
             );
         }
 
@@ -82,6 +92,24 @@ public class Schema {
 
     public List<Attribute> getAttributes() {
         return Collections.unmodifiableList(attributes);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Schema other)) {
+            return false;
+        }
+
+        return attributes.equals(other.attributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(attributes);
     }
 
     @Override
